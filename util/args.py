@@ -2,6 +2,7 @@
 # -*- coding:utf-8 -*-
 
 import argparse
+from models import archs
 
 
 def parser():
@@ -13,6 +14,7 @@ def parser():
     parser.add_argument('--dataset', '-d', default='normal')
     parser.add_argument('--frequency', '-f', type=int, default=-1)
     parser.add_argument('--resume', '-r', default='')
+    parser.add_argument('--arch', '-a', choices=archs.keys(), default='4-lay')
 
     args = parser.parse_args()
 
