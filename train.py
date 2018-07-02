@@ -10,6 +10,7 @@ from pathlib import Path
 from util.args import parser
 from util.get_dataset import get_dataset
 from util.confusion_matrix import Confusion_Matrix
+from util.print_txt import PrintTXT
 # from util.visualize import grad_cam
 from models import archs
 
@@ -29,11 +30,18 @@ def main():
     now = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
     save_dir = "../result/{}/".format(args.dataset) + now
 
-    print('GPU: {}'.format(args.gpu))
-    print('# Minibatch-size: {}'.format(args.batchsize))
-    print('# epoch: {}'.format(args.epoch))
-    print('# datasets: {}'.format(args.dataset))
-    print('')
+    if not os.path.exists(save_dir):
+        os.mkdir(save_dir)
+        print("made save_directory !")
+
+    log = PrintTXT()
+    log.add('# GPU: {}'.format(args.gpu))
+    log.add('# Minibatch-size: {}'.format(args.batchsize))
+    log.add('# epoch: {}'.format(args.epoch))
+    log.add('# datasets: {}'.format(args.dataset))
+    log.add('# using model: {}'.format(args.arch))
+    log.add('')
+    log.save(save_dir + "/log.txt")
 
     root = str(Path().resolve().parents[4] /
                'datasets' / 'processed' / args.dataset)
@@ -42,13 +50,10 @@ def main():
     train, test, class_num, mean = get_dataset(datasets)
     print("finish load datasets !")
 
-    if not os.path.exists(save_dir):
-        os.mkdir(save_dir)
-        print("made save_directory !")
-
     model = L.Classifier(archs[args.arch](class_num))
-    optimizer = chainer.optimizers.Adam()
+    optimizer = chainer.optimizers.MomentumSGD()
     optimizer.setup(model)
+    optimizer.add_hook(chainer.optimizer.WeightDecay(rate=0.0003))
 
     if args.gpu >= 0:
         chainer.cuda.get_device_from_id(args.gpu).use()
@@ -64,9 +69,9 @@ def main():
     # print_trigger = (10, 'iteration')
     log_trigger = (1, 'epoch')
 
-    trainer.extend(extensions.ExponentialShift('alpha', 0.1),
+    trainer.extend(extensions.ExponentialShift('lr', 0.1),
                    trigger=chainer.training.triggers.ManualScheduleTrigger(
-                       [50], 'epoch'))
+                       [50, 100, 150, 200], 'epoch'))
     trainer.extend(extensions.Evaluator(test_iter, model, device=args.gpu),
                    trigger=log_trigger)
     trainer.extend(extensions.dump_graph('main/loss'))

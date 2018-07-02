@@ -57,14 +57,15 @@ def get_dataset(dataset):
 
     length = len(dataset)
     class_num = len(set(dataset.labels))
-    print(class_num)
+    print('class_number: {}'.format(class_num))
+    print('')
     split_at = int(length * 0.9)
 
     train_data, test_data = chainer.datasets.split_dataset_random(
         dataset, split_at, 0)
     mean = compute_mean(train_data)
-    print(len(train_data))
-    print(len(test_data))
+    print('train_data length: {}'.format(len(train_data)))
+    print('test_data length: {}'.format(len(test_data)))
 
     train = chainer.datasets.TransformDataset(
         train_data, partial(transform, mean=mean, train=True))

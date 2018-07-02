@@ -104,6 +104,6 @@ class MyResNet(chainer.Chain):
         h = self.res4(h)
         h = self.res5(h)
         h = F.average_pooling_2d(h, 7, stride=1)
-        h = self.fc(h)
+        h = F.dropout(self.fc(h))
 
         return h
