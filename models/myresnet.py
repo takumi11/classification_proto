@@ -94,7 +94,8 @@ class MyResNet(chainer.Chain):
             self.res3 = Block(3, 256, 128, 512)
             self.res4 = Block(5, 512, 256, 1024)
             self.res5 = Block(3, 1024, 512, 2048)
-            self.fc = L.Linear(2048, class_num)
+            self.fc1 = L.Linear(2048, 128)
+            self.fc2 = L.Linear(128, class_num)
 
     def __call__(self, x):
         h = self.bn1(self.conv1(x))
@@ -104,6 +105,10 @@ class MyResNet(chainer.Chain):
         h = self.res4(h)
         h = self.res5(h)
         h = F.average_pooling_2d(h, 7, stride=1)
-        h = F.dropout(self.fc(h))
+        h = F.dropout(h, ratio=0.5)
+        h = self.fc1(h)
+        h = F.relu(h)
+        h = F.dropout(h, ratio=0.5)
+        h = self.fc2(h)
 
         return h

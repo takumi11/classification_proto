@@ -40,7 +40,11 @@ class PreFOURLAYSCNN(chainer.Chain):
         h = F.max_pooling_2d(h, 3, stride=2)
         h = F.local_response_normalization(h)
 
-        h = F.dropout(self.fc1(h))
-        h = F.dropout(self.fc2(h))
+        h = F.dropout(h, ratio=0.5)
+        h = self.fc1(h)
+        h = F.relu(h)
+        h = F.dropout(h, ratio=0.5)
+
+        h = self.fc2(h)
 
         return h
