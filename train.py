@@ -44,7 +44,7 @@ def main():
     log.save(save_dir + "/log.txt")
 
     root = str(Path().resolve().parents[4] /
-               'datasets' / 'processed' / args.dataset)
+               'datasets' / 'processed_316' / args.dataset)
     datasets = DirectoryParsingLabelDataset(root)
 
     train, test, class_num, mean = get_dataset(datasets)

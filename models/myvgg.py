@@ -33,6 +33,7 @@ class MyVGG(chainer.Chain):
             self.conv4_1 = Block(96)
             self.conv4_2 = Block(96)
             self.conv5_1 = Block(128)
+            self.conv5_2 = Block(128)
             self.fc1 = L.Linear(None, 512)
             self.bn_fc1 = L.BatchNormalization(512)
             self.fc2 = L.Linear(None, 512)
@@ -55,6 +56,7 @@ class MyVGG(chainer.Chain):
         h = F.max_pooling_2d(h, ksize=2, stride=2)
 
         h = self.conv5_1(h)
+        h = self.conv5_2(h)
         h = F.max_pooling_2d(h, ksize=2, stride=2)
 
         h = F.dropout(h, ratio=0.5)

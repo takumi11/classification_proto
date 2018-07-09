@@ -2,7 +2,9 @@
 # -*- coding:utf-8 -*-
 
 import sys
+import cv2
 import chainer
+import numpy as np
 from functools import partial
 from chainercv import transforms
 
@@ -29,14 +31,38 @@ def transform(data, mean, train=True):
 
     img, lable = data
     img = img.copy()
-
-    if train:
-        img = transforms.random_flip(img, x_random=True)
-        img = transforms.random_rotate(img, return_param=False)
-
     img -= mean
 
-    return img / 255., lable
+    size = (224, 224)
+
+    if train:
+        h, w = img.shape[1:]
+        angles = [i for i in range(0, 360, 10)]
+        angle = np.random.choice(angles)
+        img = rotate(img, angle)
+
+        rad = angle * np.pi / 180
+        new_length = int(h / (np.abs(np.cos(rad)) + np.abs(np.sin(rad))))
+        img = transforms.center_crop(img, (new_length, new_length))
+
+        # img = transforms.random_rotate(img, return_param=False)
+        img = transforms.random_flip(img, x_random=True)
+
+    img = transforms.resize(img, size, interpolation=2)
+    img *= (1.0 / 255.0)
+
+    return img, lable
+
+
+def rotate(img, angle):
+
+    img = img.copy()
+    center = (img.shape[1]/2, img.shape[2]/2)
+    rotation_matrix = cv2.getRotationMatrix2D(center, angle, 1.0)
+    img = img.transpose(1, 2, 0)
+    img = cv2.warpAffine(img, rotation_matrix,
+                         img.shape[:2]).transpose(2, 0, 1)
+    return img
 
 
 def compute_mean(dataset):
