@@ -71,7 +71,7 @@ def main():
 
     trainer.extend(extensions.ExponentialShift('lr', 0.1),
                    trigger=chainer.training.triggers.ManualScheduleTrigger(
-                       [50, 100, 150, 200], 'epoch'))
+                       [100, 200, 250, 300, 350, 400], 'epoch'))
     trainer.extend(extensions.Evaluator(test_iter, model, device=args.gpu),
                    trigger=log_trigger)
     trainer.extend(extensions.dump_graph('main/loss'))
